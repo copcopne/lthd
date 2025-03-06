@@ -14,20 +14,28 @@ class CourseAppAdminSite(admin.AdminSite):
 
     def get_urls(self):
         return [
-            path('course-stats/', self.stats_view)
+            path('cate-stats/', self.cate_stats)
         ] + super().get_urls()
 
-    def stats_view(self, request):
-        count = Course.objects.filter(active=True).count()
-        stats = Course.objects \
-            .annotate(lesson_count=Count('lesson')) \
-            .values('id', 'subject', 'lesson_count')
-        return TemplateResponse(request,
-                                'admin/course-stats.html', {
-                                        'course_count': count,
-                                        'course_stats': stats
-                                    }
-                                )
+    # def stats_view(self, request):
+    #     count = Course.objects.filter(active=True).count()
+    #     stats = Course.objects \
+    #         .annotate(lesson_count=Count('lesson')) \
+    #         .values('id', 'subject', 'lesson_count')
+    #     return TemplateResponse(request,
+    #                             'admin/course-stats.html', {
+    #                                     'course_count': count,
+    #                                     'course_stats': stats
+    #                                 }
+    #                             )
+    
+    def cate_stats(self, request):
+        stats = Category.objects.annotate(course_count=Count('course__id')) \
+            .values('id', 'name', 'course_count')
+        return TemplateResponse(request, 'admin/cate-stats.html', {
+            'stats': stats
+        })
+
 
 admin_site = CourseAppAdminSite(name="myadmin")
 
@@ -67,6 +75,12 @@ class MyCourseView(admin.ModelAdmin):
 class MyEditorForm(admin.ModelAdmin):
     form = LessonForm
     inlines = [LessonTagInlineAdmin, ]
+    
+    class Media:
+        css = {
+            'all': ('/static/css/style.css',)
+        }
+        js = ('/static/js/script.js',)
 
 
 admin_site.register(Category)

@@ -69,8 +69,8 @@ class Comment(models.Model):
     updated_date = models.DateTimeField(auto_now=True)
     content = models.TextField(null=True)
 
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['-id']
