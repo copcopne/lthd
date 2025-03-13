@@ -64,25 +64,21 @@ class Tag(models.Model):
         return self.name
 
 
-class Comment(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    content = models.TextField(null=True)
-
+class Interaction(BaseModel):
     lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     class Meta:
-        ordering = ['-id']
+        abstract = True
 
 
-class Rating(models.Model):
-    created_date = models.DateTimeField(auto_now_add=True)
-    updated_date = models.DateTimeField(auto_now=True)
-    rating = models.DecimalField(max_digits=2, decimal_places=1)
+class Comment(Interaction):
+    content = models.CharField(max_length=255)
 
-    lesson = models.ForeignKey(Lesson, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.content
 
+
+class Like(Interaction):
     class Meta:
-        ordering = ['-id']
+        unique_together = ('user', 'lesson')
