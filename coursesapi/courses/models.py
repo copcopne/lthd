@@ -1,8 +1,11 @@
-from tkinter.constants import CASCADE
-
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from ckeditor.fields import RichTextField
+from cloudinary.models import CloudinaryField
+
+
+class User(AbstractUser):
+    avatar = CloudinaryField(null=True)
 
 
 class BaseModel(models.Model):
@@ -14,51 +17,42 @@ class BaseModel(models.Model):
         abstract = True
 
 
-class User(AbstractUser):
-    pass
-
-
 class Category(BaseModel):
-    name = models.CharField(max_length=50)
-
-    class Meta:
-        ordering = ['-id']
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
 
 
 class Course(BaseModel):
-    subject = models.CharField(max_length=100)
-    content = models.TextField(null=True)
-    image = models.ImageField(upload_to='courses/%Y/%m/')
-
+    subject = models.CharField(max_length=255)
+    description = models.TextField()
+    image = CloudinaryField()
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
-
-    class Meta:
-        ordering = ['-id']
 
     def __str__(self):
         return self.subject
+
+    class Meta:
+        ordering = ['-id']
 
 
 class Lesson(BaseModel):
     subject = models.CharField(max_length=255)
     content = RichTextField()
-    image = models.ImageField(upload_to='lessons/%Y/%m/')
-
-    course = models.ForeignKey(Course, on_delete=models.PROTECT)
-    tags = models.ManyToManyField('Tag', blank=True, related_name='lessons')
+    image = CloudinaryField()
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    tags = models.ManyToManyField('Tag')
 
     class Meta:
-        ordering = ['-id']
+        unique_together = ('subject', 'course')
 
     def __str__(self):
         return self.subject
 
 
-class Tag(models.Model):
-    name = models.CharField(max_length=100)
+class Tag(BaseModel):
+    name = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
