@@ -44,10 +44,17 @@ INSTALLED_APPS = [
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework',
-    'drf_yasg'
+    'drf_yasg',
+    'oauth2_provider',
 
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        )
+}
 
+OAUTH2_PROVIDER = { 'OAUTH2_BACKEND_CLASS': 'oauth2_provider.oauth2_backends.JSONOAuthLibCore' }
 
 import cloudinary
 import cloudinary.uploader
@@ -156,3 +163,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# mMHzgmwmPuNuIpDYsmSF7hY8xExLG1kgPUwu2kca
+# wNJJxSTO1C1cq2qrcMebE3lqwTpOKF4Y240egEk7DKfS07gDCyjyHJnHclamQ0Np6j2O8tbH3LT1tNrYFHUYydyNqidy9RgFhQhOeXswUMczNXBjgxbjpAX1lpUSI6rS

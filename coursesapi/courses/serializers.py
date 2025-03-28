@@ -43,31 +43,41 @@ class LessonDetailsSerializer(ModelSerializerContainsImage):
 
 
 class UserSerializer(ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id', 'first_name', 'last_name', 'username']
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
 
+        data['avatar'] = instance.avatar.url if instance.avatar else ''
 
-class NewUserSerializer(ModelSerializer):
+        return data
+
+    def create(self, validated_data):
+        data = validated_data.copy()
+        u = User(**data)
+        u.set_password(u.password)
+        u.save()
+
+        return u
+
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'username', 'password', 'avatar']
         extra_kwargs = {
-            'password': {'write_only': True}
+            'password': {
+                'write_only': True
+            }
         }
-        
-    def create(self, validated_data):
-        data = validated_data.copy()
-
-        newUser = User(**data)
-        newUser.set_password(data['password'])
-        newUser.save()
-        
-        return newUser
-
 
 class CommentSerializer(ModelSerializer):
-    user = UserSerializer()
+    def to_representation(self, instance):
+        data = super().to_representation(instance=instance)
+        data['user'] = UserSerializer(instance=instance.user).data
+        return data
+
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'created_date', 'user']
+        fields = ['id', 'content', 'created_date','updated_date', 'user', 'lesson']
+        extra_kwargs = {
+            'lesson': {
+                'write_only': True
+            }
+        }
