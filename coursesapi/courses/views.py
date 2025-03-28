@@ -1,4 +1,4 @@
-from rest_framework import viewsets, generics, status
+from rest_framework import viewsets, generics, status ,parsers
 from rest_framework.decorators import action
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
@@ -42,10 +42,11 @@ class LessonsViewSet(viewsets.ViewSet, generics.RetrieveAPIView):
 
     @action(methods=['get'], detail=True, url_path='comments')
     def get_comments(self,request, pk):
-        comments = self.get_object().comment_set.filter(active=True)
-        return Response(serializers.CommentSerializer(comments, many=True).data, status= status.HTTP_200_OK)
+        comments = self.get_object().comment_set.select_related('user').filter(active=True)
+        return Response(serializers.CommentSerializer(comments, many=True).data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ViewSet, generics.GenericAPIView, CreateModelMixin):
-    queryset = User.objects.all()
+    queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.NewUserSerializer
+    parser_classes = parsers.MultiPartParser

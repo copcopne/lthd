@@ -50,17 +50,24 @@ class UserSerializer(ModelSerializer):
 
 class NewUserSerializer(ModelSerializer):
     class Meta:
-        model = UserSerializer.Meta.model
-        fields = UserSerializer.Meta.fields + ['password', 'avatar']
+        model = User
+        fields = ['first_name', 'last_name', 'username', 'password', 'avatar']
+        extra_kwargs = {
+            'password': {'write_only': True}
+        }
+        
+    def create(self, validated_data):
+        data = validated_data.copy()
 
-    def to_representation(self, instance):
-        data = super().to_representation(self)
-
-        return data
+        newUser = User(**data)
+        newUser.set_password(data['password'])
+        newUser.save()
+        
+        return newUser
 
 
 class CommentSerializer(ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Comment
-        fields = ['id', 'content', 'created_date', 'updated_date', 'user']
+        fields = ['id', 'content', 'created_date', 'user']
