@@ -49,4 +49,4 @@ class LessonsViewSet(viewsets.ViewSet, generics.RetrieveAPIView):
 class UserViewSet(viewsets.ViewSet, generics.GenericAPIView, CreateModelMixin):
     queryset = User.objects.filter(is_active=True)
     serializer_class = serializers.NewUserSerializer
-    parser_classes = parsers.MultiPartParser
+    parser_classes = [parsers.MultiPartParser]
