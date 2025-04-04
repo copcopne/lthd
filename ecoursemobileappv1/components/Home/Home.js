@@ -33,13 +33,18 @@ const Home = () => {
             let res = await Apis.get(url);
             setCourses([...courses, ...res.data.results]);
 
-            if(res.next === null)
+            if(res.data.next === null)
                 setPage(0);
         } catch {
 
         } finally {
             setLoading(false);
         }
+    }
+    const search = (value, callback) => {
+        setCourses([]);
+        setPage(1);
+        callback(value);
     }
 
     useEffect(() => {
@@ -63,18 +68,18 @@ const Home = () => {
             <Text style={MyStyles.subject}>DANH SÁCH KHÓA HỌC</Text>
             <View style={[MyStyles.r, MyStyles.w, MyStyles.m]}>
 
-                <TouchableOpacity onPress={() => setCateId(null)}>
+                <TouchableOpacity onPress={() => search(null, setCateId)}>
                     <Chip icon="label" style ={MyStyles.m}>Tất cả khóa học</Chip>
                 </TouchableOpacity>
                 
-                {categories.map(c=> <TouchableOpacity key={c.id} onPress={() => setCateId(c.id)}>
+                {categories.map(c=> <TouchableOpacity key={c.id} onPress={() => search(c.id, setCateId)}>
                     <Chip icon="label" style ={MyStyles.m}>{c.name}</Chip>
                 </TouchableOpacity>)}
             </View>
 
             <Searchbar
                 placeholder="Tìm kiếm khóa học..."
-                onChangeText={setQ}
+                onChangeText={() => search(q, setQ)}
                 value={q}
             />
 
