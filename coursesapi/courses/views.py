@@ -40,8 +40,9 @@ class LessonsViewSet(viewsets.ViewSet, generics.RetrieveAPIView):
     queryset = Lesson.objects.prefetch_related('tags').filter(active=True)
     serializer_class = serializers.LessonDetailsSerializer
     def get_permissions(self):
-        if self.action in ['get_comments'] and self.request.method.__eq__('POST'):
+        if self.action in ['get_comments', 'like'] and self.request.method.__eq__('POST'):
             return [permissions.IsAuthenticated()]
+        
         return [permissions.AllowAny()]
 
     @action(methods=['get', 'post'], detail=True, url_path='comments')
@@ -58,6 +59,17 @@ class LessonsViewSet(viewsets.ViewSet, generics.RetrieveAPIView):
 
         comments = self.get_object().comment_set.select_related('user').filter(active=True)
         return Response(serializers.CommentSerializer(comments, many=True).data, status=status.HTTP_200_OK)
+    
+    @action(methods=['post'], url_path='like', detail=True)
+    def like(self, request, pk):
+        li, created = Like.objects.get_or_create(user=request.user, lesson=self.get_object())
+
+        if not created:
+            li.active = not li.active
+
+        li.save()
+
+        return Response(serializers.LessonDetailsSerializer(self.get_object(), context={'request': request}).data)
 
 
 class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):

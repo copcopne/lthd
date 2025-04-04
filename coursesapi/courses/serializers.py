@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from courses.models import Category, Course, Lesson, Comment, Tag, User
@@ -6,7 +7,7 @@ from courses.models import Category, Course, Lesson, Comment, Tag, User
 class CategorySerializer(ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = ['id', 'name']                    
 
 
 class ModelSerializerContainsImage(ModelSerializer):
@@ -29,16 +30,24 @@ class TagSerializer(ModelSerializer):
 
 
 class LessonSerializer(ModelSerializerContainsImage):
-    tags = TagSerializer(many=True)
     class Meta:
         model = Lesson
-        fields = ['id', 'subject', 'image', 'course_id', 'created_date', 'updated_date', 'tags']
+        fields = ['id', 'subject', 'image', 'course_id', 'created_date', 'updated_date']
 
 
 class LessonDetailsSerializer(ModelSerializerContainsImage):
+    tags = TagSerializer(many=True)
+    liked = serializers.SerializerMethodField()
+
+    def get_liked(self, lesson):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return lesson.like_set.filter(user=request.user, active=True).exists()
+
     class Meta:
+
         model = LessonSerializer.Meta.model
-        fields = LessonSerializer.Meta.fields + ['content']
+        fields = LessonSerializer.Meta.fields + ['content', 'tags', 'like']
 
 
 
